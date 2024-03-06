@@ -21,6 +21,7 @@ pipeline {
             steps {
                 script {
                     docker.build registry
+                    dockerImage.tag("$BUILD_NUMBER")
                 }
             }
         }
@@ -36,7 +37,7 @@ pipeline {
         }
         
                         
-        stage ("Helm install") {
+        stage ("Helm Deploy") {
             steps {
                     sh "helm upgrade first --install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER"
                 }
