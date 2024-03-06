@@ -19,7 +19,7 @@ pipeline {
         
         stage ("Build Image") {
             steps {
-                script {
+                 {
                     dockerImage = docker.build registry 
                     dockerImage.tag("$BUILD_NUMBER")
                 }
@@ -28,6 +28,7 @@ pipeline {
         
         stage ("Push to ECR") {
             steps {
+                
                 script {
                     sh "aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 176422384401.dkr.ecr.us-west-2.amazonaws.com"
                     sh "docker push 176422384401.dkr.ecr.us-west-2.amazonaws.com/my-docker-repo:$BUILD_NUMBER"
@@ -39,7 +40,8 @@ pipeline {
                         
         stage ("Helm Deploy") {
             steps {
-                    sh "helm upgrade first --install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER"
+                withKubeConfig([credentialsId: 'kubelogin']) {
+                    sh ("helm upgrade first --install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER")
                 }
             }
     }
